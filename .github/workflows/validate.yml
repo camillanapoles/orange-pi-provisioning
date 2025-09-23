@@ -1,169 +1,171 @@
-
+---
 name: Validate Orange Pi Provisioning
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install ShellCheck
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y shellcheck
-    
-    - name: Run ShellCheck on scripts
-      run: |
-        find scripts/ -name "*.sh" -type f -exec shellcheck {} \;
-    
-    - name: Check script permissions
-      run: |
-        if [ ! -x scripts/provision_sbc.sh ]; then
-          echo "Error: provision_sbc.sh is not executable"
-          exit 1
-        fi
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts
+        run: |
+          find scripts/ -name "*.sh" -type f -exec shellcheck {} \;
+
+      - name: Check script permissions
+        run: |
+          if [ ! -x scripts/provision_sbc.sh ]; then
+            echo "Error: provision_sbc.sh is not executable"
+            exit 1
+          fi
 
   yaml-lint:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install yamllint
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y yamllint
-    
-    - name: Run yamllint
-      run: |
-        yamllint .github/workflows/
+      - uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint .github/workflows/
 
   config-validation:
     name: Config Validation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Validate config templates
-      run: |
-        # Verificar se templates existem
-        if [ ! -f configs/armbian_first_run.txt.template ]; then
-          echo "Error: armbian_first_run.txt.template not found"
-          exit 1
-        fi
-        
-        if [ ! -f configs/dietpi.txt ]; then
-          echo "Error: dietpi.txt not found"
-          exit 1
-        fi
-        
-        if [ ! -f configs/dietpi-wifi.txt ]; then
-          echo "Error: dietpi-wifi.txt not found"
-          exit 1
-        fi
-        
-        # Verificar placeholders nos templates
-        echo "Checking placeholders in templates..."
-        
-        # Armbian template
-        if ! grep -q "{{WIFI_SSID}}" configs/armbian_first_run.txt.template; then
-          echo "Error: Missing {{WIFI_SSID}} placeholder in armbian template"
-          exit 1
-        fi
-        
-        # DietPi templates
-        if ! grep -q "{{ROOT_PASSWORD}}" configs/dietpi.txt; then
-          echo "Error: Missing {{ROOT_PASSWORD}} placeholder in dietpi.txt"
-          exit 1
-        fi
-        
-        if ! grep -q "{{WIFI_SSID}}" configs/dietpi-wifi.txt; then
-          echo "Error: Missing {{WIFI_SSID}} placeholder in dietpi-wifi.txt"
-          exit 1
-        fi
-        
-        echo "All config templates validated successfully!"
+      - uses: actions/checkout@v4
+
+      - name: Validate config templates
+        run: |
+          # Verificar se templates existem
+          if [ ! -f configs/armbian_first_run.txt.template ]; then
+            echo "Error: armbian_first_run.txt.template not found"
+            exit 1
+          fi
+
+          if [ ! -f configs/dietpi.txt ]; then
+            echo "Error: dietpi.txt not found"
+            exit 1
+          fi
+
+          if [ ! -f configs/dietpi-wifi.txt ]; then
+            echo "Error: dietpi-wifi.txt not found"
+            exit 1
+          fi
+
+          # Verificar placeholders nos templates
+          echo "Checking placeholders in templates..."
+
+          # Armbian template
+          if ! grep -q "{{WIFI_SSID}}" \
+              configs/armbian_first_run.txt.template; then
+            echo "Error: Missing {{WIFI_SSID}} placeholder"
+            exit 1
+          fi
+
+          # DietPi templates
+          if ! grep -q "{{ROOT_PASSWORD}}" configs/dietpi.txt; then
+            echo "Error: Missing {{ROOT_PASSWORD}} placeholder"
+            exit 1
+          fi
+
+          if ! grep -q "{{WIFI_SSID}}" configs/dietpi-wifi.txt; then
+            echo "Error: Missing {{WIFI_SSID}} placeholder"
+            exit 1
+          fi
+
+          echo "All config templates validated successfully!"
 
   documentation:
     name: Documentation Check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check README exists
-      run: |
-        if [ ! -f README.md ]; then
-          echo "Error: README.md not found"
-          exit 1
-        fi
-    
-    - name: Check README content
-      run: |
-        # Verificar seções obrigatórias no README
-        sections=("Visão Geral" "Pré-requisitos" "Uso" "Troubleshooting" "Segurança")
-        
-        for section in "${sections[@]}"; do
-          if ! grep -q "$section" README.md; then
-            echo "Warning: Section '$section' not found in README.md"
+      - uses: actions/checkout@v4
+
+      - name: Check README exists
+        run: |
+          if [ ! -f README.md ]; then
+            echo "Error: README.md not found"
+            exit 1
           fi
-        done
-    
-    - name: Check LICENSE exists
-      run: |
-        if [ ! -f LICENSE ]; then
-          echo "Warning: LICENSE file not found"
-        fi
+
+      - name: Check README content
+        run: |
+          # Verificar seções obrigatórias no README
+          sections=("Visão Geral" "Pré-requisitos" "Uso" "Troubleshooting")
+
+          for section in "${sections[@]}"; do
+            if ! grep -q "$section" README.md; then
+              echo "Warning: Section '$section' not found in README.md"
+            fi
+          done
+
+      - name: Check LICENSE exists
+        run: |
+          if [ ! -f LICENSE ]; then
+            echo "Warning: LICENSE file not found"
+          fi
 
   structure-validation:
     name: Repository Structure
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Validate directory structure
-      run: |
-        # Verificar estrutura de diretórios esperada
-        required_dirs=("scripts" "configs" ".github/workflows")
-        required_files=("scripts/provision_sbc.sh" "README.md")
-        
-        for dir in "${required_dirs[@]}"; do
-          if [ ! -d "$dir" ]; then
-            echo "Error: Required directory '$dir' not found"
-            exit 1
-          fi
-        done
-        
-        for file in "${required_files[@]}"; do
-          if [ ! -f "$file" ]; then
-            echo "Error: Required file '$file' not found"
-            exit 1
-          fi
-        done
-        
-        echo "Repository structure validation passed!"
+      - uses: actions/checkout@v4
+
+      - name: Validate directory structure
+        run: |
+          # Verificar estrutura de diretórios esperada
+          required_dirs=("scripts" "configs" ".github/workflows")
+          required_files=("scripts/provision_sbc.sh" "README.md")
+
+          for dir in "${required_dirs[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "Error: Required directory '$dir' not found"
+              exit 1
+            fi
+          done
+
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: Required file '$file' not found"
+              exit 1
+            fi
+          done
+
+          echo "Repository structure validation passed!"
 
   security-check:
     name: Security Check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check for hardcoded credentials
-      run: |
-        # Verificar se não há credenciais hardcoded
-        if grep -r "password=" scripts/ configs/ --exclude-dir=.git; then
-          echo "Warning: Potential hardcoded passwords found"
-        fi
-        
-        if grep -r "key=" scripts/ configs/ --exclude-dir=.git | grep -v "{{"; then
-          echo "Warning: Potential hardcoded keys found"
-        fi
-        
-        echo "Security check completed"
+      - uses: actions/checkout@v4
+
+      - name: Check for hardcoded credentials
+        run: |
+          # Verificar se não há credenciais hardcoded
+          if grep -r "password=" scripts/ configs/ --exclude-dir=.git; then
+            echo "Warning: Potential hardcoded passwords found"
+          fi
+
+          if grep -r "key=" scripts/ configs/ --exclude-dir=.git | \
+              grep -v "{{"; then
+            echo "Warning: Potential hardcoded keys found"
+          fi
+
+          echo "Security check completed"
