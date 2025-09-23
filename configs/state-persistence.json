@@ -1,0 +1,27 @@
+
+{
+  "version": "1.0",
+  "created_at": "2025-09-23T00:00:00Z",
+  "last_updated": "2025-09-23T00:00:00Z",
+  "deployments": {
+    "ender3": {
+      "status": "not_started",
+      "last_deployment": null,
+      "validation_history": []
+    },
+    "laser": {
+      "status": "not_started",
+      "last_deployment": null,
+      "validation_history": []
+    }
+  },
+  "system_info": {
+    "local_machine": null,
+    "collected_at": null
+  },
+  "configuration": {
+    "auto_validate": true,
+    "retry_attempts": 3,
+    "timeout_seconds": 300
+  }
+}

@@ -1,47 +1,80 @@
 
-# Arquivos temporários
-*.tmp
-*.temp
-/tmp/
-
-# Relatórios gerados
-/reports/*.md
-
-# Arquivos de backup
-*.backup
-*.bak
-*~
-
-# Arquivos de log
+# Logs
+logs/
 *.log
 
-# Diretório temporário do script
-/temp/
-/downloads/
+# Estado e configurações sensíveis
+state/
+*.json.tmp
 
-# Arquivos de imagem baixados
+# Imagens baixadas
+images/
 *.img
 *.img.xz
-*.img.gz
+*.iso
 
-# Arquivos de configuração com credenciais reais
-*_real.txt
-*_production.txt
+# Pontos de montagem temporários
+mounts/
+/tmp/orange-pi-*
+
+# Arquivos de backup
+*.bak
+*.backup
+*~
 
 # Arquivos do sistema
 .DS_Store
 Thumbs.db
 
-# Arquivos do editor
+# Arquivos do Docker
+.docker/
+docker-compose.override.yml
+
+# Arquivos de IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Arquivos de teste
-test_*
-*_test.sh
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
 
-# Arquivos de desenvolvimento
-dev/
-development/
+# Arquivos Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos temporários
+*.tmp
+*.temp
+/tmp/
+
+# Chaves SSH (segurança)
+*.pem
+*.key
+id_rsa*
+
+# Senhas e credenciais
+passwords.txt
+credentials.json
+secrets.env
+
+# Relatórios sensíveis (manter apenas templates)
+reports/*.pdf
+reports/*_final.*
+
+# Arquivos de configuração local
+local-config.json
+user-settings.json
+
+# Cache do sistema
+.cache/
+*.cache
