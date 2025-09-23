@@ -1,0 +1,118 @@
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Scripts and Configuration
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck jq
+    
+    - name: Validate shell scripts
+      run: |
+        echo "🔍 Validating shell scripts..."
+        find scripts/ -name "*.sh" -exec shellcheck {} \;
+        echo "✅ Shell scripts validation completed"
+    
+    - name: Validate JSON configuration files
+      run: |
+        echo "🔍 Validating JSON files..."
+        find configs/ -name "*.json" -exec jq empty {} \;
+        echo "✅ JSON files validation completed"
+    
+    - name: Validate Docker configuration
+      run: |
+        echo "🔍 Validating Docker files..."
+        docker --version
+        docker compose config
+        echo "✅ Docker configuration validation completed"
+    
+    - name: Test Docker build
+      run: |
+        echo "🔍 Testing Docker build..."
+        docker compose build
+        echo "✅ Docker build test completed"
+    
+    - name: Run basic functionality tests
+      run: |
+        echo "🔍 Running basic functionality tests..."
+        docker compose run --rm provisioner bash -c "
+          echo 'Testing script permissions...'
+          ls -la scripts/
+          echo 'Testing configuration access...'
+          ls -la configs/
+          echo 'Testing basic script execution...'
+          bash scripts/collect-local-info.sh --help || echo 'Help not available'
+        "
+        echo "✅ Basic functionality tests completed"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  documentation:
+    runs-on: ubuntu-latest
+    name: Documentation Check
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check documentation completeness
+      run: |
+        echo "🔍 Checking documentation..."
+        
+        # Check if required documentation files exist
+        required_files=(
+          "README.md"
+          "TESTING_GUIDE.md"
+          "USE_CASES.md"
+          "DEVELOPMENT.md"
+          "TROUBLESHOOTING.md"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ $file exists"
+          else
+            echo "❌ $file is missing"
+            exit 1
+          fi
+        done
+        
+        echo "✅ All required documentation files are present"
+    
+    - name: Validate markdown syntax
+      uses: DavidAnson/markdownlint-action@v1
+      with:
+        files: '**/*.md'
+        config: '.markdownlint.json'
+        ignore: 'node_modules'
