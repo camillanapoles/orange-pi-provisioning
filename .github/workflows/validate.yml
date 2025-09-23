@@ -1,7 +1,7 @@
 ---
 name: Validate Orange Pi Provisioning
 
-on:
+"on":
   push:
     branches: [main, develop]
   pull_request:
@@ -12,7 +12,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Install ShellCheck
         run: |
@@ -34,7 +34,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Install yamllint
         run: |
@@ -49,7 +49,7 @@ jobs:
     name: Config Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Validate config templates
         run: |
@@ -96,7 +96,7 @@ jobs:
     name: Documentation Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Check README exists
         run: |
@@ -126,7 +126,7 @@ jobs:
     name: Repository Structure
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Validate directory structure
         run: |
@@ -154,7 +154,7 @@ jobs:
     name: Security Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Check for hardcoded credentials
         run: |
