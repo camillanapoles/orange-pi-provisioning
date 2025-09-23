@@ -1,0 +1,46 @@
+
+version: '3.8'
+
+services:
+  provisioner:
+    build: .
+    container_name: orange-pi-provisioner
+    privileged: true
+    volumes:
+      # Montar diretório de trabalho
+      - ./:/workspace/project
+      # Montar dispositivos para acesso aos microSDs
+      - /dev:/dev
+      # Montar diretório para imagens baixadas
+      - ./images:/workspace/images
+      # Montar diretório para logs persistentes
+      - ./logs:/workspace/logs
+      # Montar diretório para estado persistente
+      - ./state:/workspace/state
+      # Acesso à rede do host para coleta de informações
+      - /proc/net:/host/proc/net:ro
+      - /sys/class/net:/host/sys/class/net:ro
+    network_mode: host
+    environment:
+      - HOST_USER=${USER}
+      - HOST_HOME=${HOME}
+      - WORKSPACE_DIR=/workspace
+    working_dir: /workspace/project
+    stdin_open: true
+    tty: true
+
+  validator:
+    build: .
+    container_name: orange-pi-validator
+    depends_on:
+      - provisioner
+    volumes:
+      - ./:/workspace/project
+      - ./logs:/workspace/logs
+      - ./state:/workspace/state
+    network_mode: host
+    environment:
+      - WORKSPACE_DIR=/workspace
+    working_dir: /workspace/project
+    profiles:
+      - validation
