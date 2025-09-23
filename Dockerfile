@@ -1,5 +1,5 @@
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Evitar prompts interativos durante instalação
 ENV DEBIAN_FRONTEND=noninteractive
