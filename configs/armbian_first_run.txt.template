@@ -1,0 +1,45 @@
+
+# Armbian First Run Configuration Template
+# Este arquivo será processado pelo script provision_sbc.sh
+# Placeholders serão substituídos pelos valores reais durante o provisionamento
+
+FR_general_delete_this_file_after_completion=1
+FR_general_subsequent_boots_delete_this_file=1
+
+# Network Configuration
+FR_net_change_defaults=1
+FR_net_ethernet_enabled=1
+FR_net_wifi_enabled=1
+FR_net_wifi_ssid={{WIFI_SSID}}
+FR_net_wifi_key={{WIFI_PSK}}
+FR_net_use_static=1
+FR_net_static_ip={{FIXED_IP}}
+FR_net_static_mask=255.255.255.0
+FR_net_static_gateway={{GATEWAY}}
+FR_net_static_dns=8.8.8.8
+
+# SSH Configuration
+FR_openssh_enable=1
+FR_openssh_port={{SSH_PORT}}
+FR_openssh_permit_root_login=yes
+
+# User Configuration
+FR_user_root_password={{ROOT_PASSWORD}}
+FR_user_root_pw_generate=0
+
+# System Configuration
+FR_general_lang=pt_BR.UTF-8
+FR_general_timezone=America/Sao_Paulo
+
+# Performance and Security
+FR_general_desktop_disable=1
+FR_general_swap_disable=1
+
+# Additional configurations for SBC optimization
+FR_general_cpu_governor=ondemand
+FR_general_enable_zram=1
+FR_general_zram_size=25
+
+# Disable unnecessary services for headless operation
+FR_general_disable_ipv6=0
+FR_general_enable_ufw=1

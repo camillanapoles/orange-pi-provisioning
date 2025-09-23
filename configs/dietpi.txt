@@ -1,0 +1,78 @@
+
+# DietPi Configuration File
+# Configurações para provisionamento headless do DietPi
+# Placeholders serão substituídos pelo script provision_sbc.sh
+
+#------------------------------------------------------------------------------------------------------
+# DietPi-Automation settings, applied on first boot of DietPi only, ONCE!
+#------------------------------------------------------------------------------------------------------
+
+# Automation
+AUTO_SETUP_AUTOMATED=1
+AUTO_SETUP_GLOBAL_PASSWORD={{ROOT_PASSWORD}}
+AUTO_SETUP_FORCE_PARTITION_RESIZE=1
+
+# Network
+AUTO_SETUP_NET_ETHERNET_ENABLED=1
+AUTO_SETUP_NET_WIFI_ENABLED=1
+AUTO_SETUP_NET_USESTATIC=1
+AUTO_SETUP_NET_STATIC_IP={{FIXED_IP}}
+AUTO_SETUP_NET_STATIC_MASK=255.255.255.0
+AUTO_SETUP_NET_STATIC_GATEWAY={{GATEWAY}}
+AUTO_SETUP_NET_STATIC_DNS=8.8.8.8
+
+# SSH Server
+AUTO_SETUP_SSH_SERVER_INDEX=-2
+
+# Locale/Timezone
+AUTO_SETUP_TIMEZONE=America/Sao_Paulo
+AUTO_SETUP_LOCALE=pt_BR.UTF-8
+AUTO_SETUP_KEYBOARD_LAYOUT=br
+
+# APT mirrors
+AUTO_SETUP_NET_HOSTNAME=orangepi-{{PROJECT_TYPE}}
+
+# Software to automatically install
+AUTO_SETUP_INSTALL_SOFTWARE_ID=0
+
+# Logging
+AUTO_SETUP_AUTOMATED_LOGGING=1
+
+# Survey
+SURVEY_OPTED_IN=0
+
+# DietPi-Config settings
+CONFIG_SOUNDCARD=none
+CONFIG_LCDPANEL=none
+CONFIG_SERIALCONSOLE_ENABLE=1
+CONFIG_BOOT_WAIT_FOR_NETWORK=2
+
+# CPU Governor
+CONFIG_CPU_GOVERNOR=ondemand
+CONFIG_CPU_USAGE_THROTTLE_UP=50
+
+# Memory
+CONFIG_G_CHECK_RAM_MINIMUM=1
+
+# Swapfile
+AUTO_SETUP_SWAPFILE_SIZE=0
+
+# Logging mode
+CONFIG_G_LOGGING_MODE=1
+
+# NTP
+CONFIG_NTP_MODE=4
+
+# Proxy
+CONFIG_PROXY_ENABLED=0
+
+# APT
+CONFIG_G_CHECK_APT_UPDATES=1
+CONFIG_CHECK_DIETPI_UPDATES=1
+
+# Network test
+CONFIG_G_CHECK_URL_TIMEOUT=10
+CONFIG_G_CHECK_URL_ATTEMPTS=2
+
+# DietPi-Software
+SOFTWARE_DISABLE_SSH_PASSWORD_LOGINS=0

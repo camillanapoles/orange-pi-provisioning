@@ -1,0 +1,47 @@
+
+# Arquivos temporários
+*.tmp
+*.temp
+/tmp/
+
+# Relatórios gerados
+/reports/*.md
+
+# Arquivos de backup
+*.backup
+*.bak
+*~
+
+# Arquivos de log
+*.log
+
+# Diretório temporário do script
+/temp/
+/downloads/
+
+# Arquivos de imagem baixados
+*.img
+*.img.xz
+*.img.gz
+
+# Arquivos de configuração com credenciais reais
+*_real.txt
+*_production.txt
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos do editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de teste
+test_*
+*_test.sh
+
+# Arquivos de desenvolvimento
+dev/
+development/

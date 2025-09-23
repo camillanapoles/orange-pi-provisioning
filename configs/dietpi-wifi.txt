@@ -1,0 +1,33 @@
+
+# DietPi WiFi Configuration
+# Configurações WiFi para DietPi
+# Placeholders serão substituídos pelo script provision_sbc.sh
+
+# WiFi Credentials
+aWIFI_SSID[0]='{{WIFI_SSID}}'
+aWIFI_KEY[0]='{{WIFI_PSK}}'
+
+# WiFi Security Settings
+aWIFI_KEYMGR[0]='WPA-PSK'
+aWIFI_PROTO[0]='RSN'
+aWIFI_PAIRWISE[0]='CCMP'
+aWIFI_AUTH_ALG[0]='OPEN'
+
+# Enterprise WiFi Settings (deixar vazio para redes domésticas)
+aWIFI_EAPMETHOD[0]=''
+aWIFI_IDENTITY[0]=''
+aWIFI_PASSWORD[0]=''
+aWIFI_CERT[0]=''
+aWIFI_CA_CERT[0]=''
+aWIFI_PRIVATE_KEY[0]=''
+aWIFI_PRIVATE_KEY_PASSWD[0]=''
+aWIFI_PHASE1[0]=''
+aWIFI_PHASE2[0]=''
+
+# Configurações adicionais para múltiplas redes (opcional)
+# aWIFI_SSID[1]='Segunda_Rede'
+# aWIFI_KEY[1]='senha_segunda_rede'
+# aWIFI_KEYMGR[1]='WPA-PSK'
+# aWIFI_PROTO[1]='RSN'
+# aWIFI_PAIRWISE[1]='CCMP'
+# aWIFI_AUTH_ALG[1]='OPEN'
