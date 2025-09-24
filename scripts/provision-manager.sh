@@ -41,12 +41,12 @@ show_project_menu() {
     echo
     echo "1) Ender 3 SE - Orange Pi Zero 3 (2GB)"
     echo "   • Klipper + firmware fix + screen"
-    echo "   • IP: 192.168.1.100"
+    echo "   • IP: Detecção automática de rede"
     echo "   • Hostname: ender3-pi"
     echo
     echo "2) LaserTree K1 - Orange Pi Zero 2W (1GB)"
     echo "   • LightBurn + controle de laser"
-    echo "   • IP: 192.168.1.101"
+    echo "   • IP: Detecção automática de rede"
     echo "   • Hostname: laser-pi"
     echo
     echo "3) Validar deployment existente"
@@ -92,7 +92,7 @@ deploy_ender3() {
     echo "• Baixar imagem Armbian para Orange Pi Zero 3"
     echo "• Detectar e gravar microSD"
     echo "• Configurar Klipper e dependências"
-    echo "• Configurar rede com IP 192.168.1.100"
+    echo "• Configurar rede com detecção automática de IP"
     echo
     
     # Verificar se informações WiFi estão configuradas
@@ -130,7 +130,7 @@ deploy_laser() {
     echo "• Baixar imagem Armbian para Orange Pi Zero 2W"
     echo "• Detectar e gravar microSD"
     echo "• Configurar LightBurn e controle de laser"
-    echo "• Configurar rede com IP 192.168.1.101"
+    echo "• Configurar rede com detecção automática de IP"
     echo
     
     # Verificar se informações WiFi estão configuradas
@@ -210,8 +210,8 @@ validate_deployment() {
     echo "=== VALIDAÇÃO DE DEPLOYMENT ==="
     echo
     echo "Projetos disponíveis para validação:"
-    echo "1) Ender 3 SE (192.168.1.100)"
-    echo "2) LaserTree K1 (192.168.1.101)"
+    echo "1) Ender 3 SE (IP automático)"
+    echo "2) LaserTree K1 (IP automático)"
     echo "0) Voltar"
     echo
     

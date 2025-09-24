@@ -56,6 +56,83 @@ load_local_info() {
     log "Informações locais carregadas"
 }
 
+# Função para resolver IP dinâmico do projeto
+resolve_project_ip() {
+    local project_name="$1"
+    local local_info_file="$STATE_DIR/local-info.json"
+    local config_file="$STATE_DIR/laser-config.json"
+    
+    log "Resolvendo IP para projeto $project_name..."
+    
+    # Verificar se configuração usa IP automático
+    local static_ip
+    static_ip=$(jq -r '.network.static_ip' "$config_file")
+    
+    if [[ "$static_ip" != "auto" ]]; then
+        log "Usando IP fixo configurado: $static_ip"
+        echo "$static_ip"
+        return 0
+    fi
+    
+    # Tentar usar sugestão inteligente
+    local suggested_ip
+    suggested_ip=$(jq -r ".network.ip_suggestions.${project_name} // empty" "$local_info_file")
+    
+    if [[ -n "$suggested_ip" && "$suggested_ip" != "null" ]]; then
+        log "Usando IP sugerido pela detecção inteligente: $suggested_ip"
+        echo "$suggested_ip"
+        return 0
+    fi
+    
+    # Fallback para IP configurado
+    local fallback_ip
+    fallback_ip=$(jq -r '.network.ip_detection.fallback_ip // empty' "$config_file")
+    
+    if [[ -n "$fallback_ip" && "$fallback_ip" != "null" ]]; then
+        log "AVISO: Usando IP de fallback: $fallback_ip"
+        log "AVISO: Verifique se este IP não está em uso na rede!"
+        echo "$fallback_ip"
+        return 0
+    fi
+    
+    log "ERRO: Não foi possível resolver IP para o projeto"
+    return 1
+}
+
+# Função para calcular máscara de rede
+resolve_subnet_mask() {
+    local local_info_file="$STATE_DIR/local-info.json"
+    local config_file="$STATE_DIR/laser-config.json"
+    
+    # Verificar se configuração usa máscara automática
+    local subnet_mask
+    subnet_mask=$(jq -r '.network.subnet_mask' "$config_file")
+    
+    if [[ "$subnet_mask" != "auto" ]]; then
+        echo "$subnet_mask"
+        return 0
+    fi
+    
+    # Usar CIDR da rede detectada
+    local cidr
+    cidr=$(jq -r '.network.detection.cidr // empty' "$local_info_file")
+    
+    if [[ -n "$cidr" && "$cidr" != "null" ]]; then
+        case "$cidr" in
+            24) echo "255.255.255.0" ;;
+            16) echo "255.255.0.0" ;;
+            8) echo "255.0.0.0" ;;
+            *) 
+                log "AVISO: CIDR $cidr não reconhecido, usando /24"
+                echo "255.255.255.0"
+                ;;
+        esac
+    else
+        log "AVISO: CIDR não detectado, usando máscara padrão /24"
+        echo "255.255.255.0"
+    fi
+}
+
 # Baixar imagem do Armbian para Orange Pi Zero 2W
 download_armbian_image() {
     local image_dir="$PROJECT_DIR/images"
@@ -180,6 +257,23 @@ flash_microsd() {
 configure_first_boot() {
     log "Configurando primeira inicialização..."
     
+    # Resolver IP e máscara dinamicamente
+    local resolved_ip
+    local resolved_mask
+    local cidr
+    local local_info="$STATE_DIR/local-info.json"
+    
+    if ! resolved_ip=$(resolve_project_ip "laser"); then
+        log "ERRO: Falha ao resolver IP para o projeto"
+        exit 1
+    fi
+    
+    resolved_mask=$(resolve_subnet_mask)
+    cidr=$(jq -r '.network.detection.cidr // 24' "$local_info")
+    
+    log "IP resolvido: $resolved_ip/$cidr"
+    log "Máscara: $resolved_mask"
+    
     # Montar partição boot
     local mount_point="/tmp/orange-pi-boot"
     local device
@@ -199,13 +293,16 @@ configure_first_boot() {
     fi
     
     # Configurar armbian_first_run.txt
-    local local_info="$STATE_DIR/local-info.json"
     local wifi_ssid
     local wifi_password
     local ssh_key
+    local gateway
+    local dns_servers
     
     wifi_ssid=$(jq -r '.network.wifi.ssid // ""' "$local_info")
     ssh_key=$(jq -r '.ssh.public_key // ""' "$local_info")
+    gateway=$(jq -r '.network.gateway' "$local_info")
+    dns_servers=$(jq -r '.network.dns_servers | join(", ")' "$local_info")
     
     # Obter senha WiFi da configuração (deve ser fornecida pelo usuário)
     wifi_password=$(jq -r '.wifi.password // ""' "$STATE_DIR/laser-config.json")
@@ -216,6 +313,7 @@ configure_first_boot() {
 
 # Configuração automática Orange Pi Zero 2W - LaserTree K1
 # Gerado em: $(date)
+# IP configurado: $resolved_ip/$cidr (detecção inteligente)
 
 # Configurar hostname
 hostnamectl set-hostname laser-pi
@@ -239,10 +337,10 @@ network:
   wifis:
     wlan0:
       dhcp4: false
-      addresses: [192.168.1.101/24]
-      gateway4: $(jq -r '.network.gateway' "$local_info")
+      addresses: [$resolved_ip/$cidr]
+      gateway4: $gateway
       nameservers:
-        addresses: $(jq -r '.network.dns_servers | join(", ")' "$local_info")
+        addresses: [$dns_servers]
       access-points:
         "$wifi_ssid":
           password: "$wifi_password"
@@ -287,12 +385,19 @@ save_deployment_state() {
     local state_file="$STATE_DIR/laser-deployment.json"
     local deployment_state
     
+    # Obter IP resolvido dinamicamente
+    local resolved_ip
+    if ! resolved_ip=$(resolve_project_ip "laser"); then
+        resolved_ip="auto-detection-failed"
+    fi
+    
     deployment_state=$(jq -n \
         --arg project "laser" \
         --arg device "$(jq -r '.microsd_device' "$STATE_DIR/laser-config.json")" \
         --arg image "$(jq -r '.image_path' "$STATE_DIR/laser-config.json")" \
         --arg hostname "laser-pi" \
-        --arg ip "192.168.1.101" \
+        --arg ip "$resolved_ip" \
+        --arg ip_method "intelligent_detection" \
         --arg status "flashed" \
         --arg timestamp "$(date -Iseconds)" \
         '{
@@ -303,7 +408,8 @@ save_deployment_state() {
             },
             network: {
                 hostname: $hostname,
-                ip: $ip
+                ip: $ip,
+                ip_method: $ip_method
             },
             status: $status,
             deployed_at: $timestamp,
@@ -341,7 +447,13 @@ main() {
     echo "4. Aguardar primeira inicialização (5-10 minutos)"
     echo "5. Executar validação: ./scripts/validate-deployment.sh laser"
     echo
-    echo "IP configurado: 192.168.1.101"
+    # Mostrar IP resolvido dinamicamente
+    local resolved_ip
+    if resolved_ip=$(resolve_project_ip "laser"); then
+        echo "IP configurado: $resolved_ip (detecção inteligente)"
+    else
+        echo "IP configurado: auto-detection-failed (verifique logs)"
+    fi
     echo "Hostname: laser-pi"
     echo "Usuário: laser"
     echo "Senha: laserpi2024"
