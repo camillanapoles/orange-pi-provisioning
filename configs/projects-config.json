@@ -13,9 +13,14 @@
       },
       "network": {
         "hostname": "ender3-pi",
-        "static_ip": "192.168.1.100",
-        "subnet_mask": "255.255.255.0",
-        "ssh_port": 22
+        "static_ip": "auto",
+        "subnet_mask": "auto",
+        "ssh_port": 22,
+        "ip_detection": {
+          "method": "intelligent",
+          "fallback_ip": "192.168.1.100",
+          "prefer_range": "100-200"
+        }
       },
       "user": {
         "username": "ender3",
@@ -74,9 +79,14 @@
       },
       "network": {
         "hostname": "laser-pi",
-        "static_ip": "192.168.1.101",
-        "subnet_mask": "255.255.255.0",
-        "ssh_port": 22
+        "static_ip": "auto",
+        "subnet_mask": "auto",
+        "ssh_port": 22,
+        "ip_detection": {
+          "method": "intelligent",
+          "fallback_ip": "192.168.1.101",
+          "prefer_range": "100-200"
+        }
       },
       "user": {
         "username": "laser",
