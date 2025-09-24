@@ -17,7 +17,7 @@ mkdir -p "$(dirname "$STATE_FILE")" "$(dirname "$LOG_FILE")"
 
 # Função de log
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE" >&2
 }
 
 # Função para detectar interface de rede principal
@@ -33,8 +33,10 @@ detect_network_info() {
     # Detectar gateway e interface principal
     local gateway_info
     gateway_info=$(ip route | grep default | head -1)
-    local gateway=$(echo "$gateway_info" | awk '{print $3}')
-    local interface=$(echo "$gateway_info" | awk '{print $5}')
+    local gateway
+    gateway=$(echo "$gateway_info" | awk '{print $3}')
+    local interface
+    interface=$(echo "$gateway_info" | awk '{print $5}')
     
     if [[ -z "$gateway" || -z "$interface" ]]; then
         log "AVISO: Não foi possível detectar gateway ou interface principal"
@@ -44,8 +46,10 @@ detect_network_info() {
     # Obter IP atual e máscara de rede
     local ip_info
     ip_info=$(ip addr show "$interface" | grep 'inet ' | head -1)
-    local current_ip=$(echo "$ip_info" | awk '{print $2}' | cut -d/ -f1)
-    local cidr=$(echo "$ip_info" | awk '{print $2}' | cut -d/ -f2)
+    local current_ip
+    current_ip=$(echo "$ip_info" | awk '{print $2}' | cut -d/ -f1)
+    local cidr
+    cidr=$(echo "$ip_info" | awk '{print $2}' | cut -d/ -f2)
     
     # Calcular rede base
     local network_base
@@ -182,6 +186,13 @@ suggest_project_ips() {
     local network_info="$1"
     local available_ips="$2"
     
+    # Validar se available_ips é um JSON válido
+    if ! echo "$available_ips" | jq . >/dev/null 2>&1; then
+        log "ERRO: available_ips não é um JSON válido: $available_ips"
+        echo '{"status": "error", "message": "Dados de IPs inválidos"}'
+        return 1
+    fi
+    
     local current_ip
     current_ip=$(echo "$network_info" | jq -r '.current_ip')
     
@@ -189,8 +200,9 @@ suggest_project_ips() {
     local gateway
     gateway=$(echo "$network_info" | jq -r '.gateway')
     
-    local exclude_list
-    exclude_list=$(jq -n --arg current "$current_ip" --arg gateway "$gateway" '[$current, $gateway]')
+    # Note: exclude_list pode ser usado em futuras implementações de filtragem
+    # local exclude_list
+    # exclude_list=$(jq -n --arg current "$current_ip" --arg gateway "$gateway" '[$current, $gateway]')
     
     # Sugerir IPs específicos para cada projeto
     local suggestions="{}"
