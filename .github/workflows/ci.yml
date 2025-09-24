@@ -111,7 +111,8 @@ jobs:
         echo "✅ All required documentation files are present"
     
     - name: Validate markdown syntax
-      uses: DavidAnson/markdownlint-action@v1
+      # uses: DavidAnson/markdownlint-action@v1
+      uses: davidanson/markdownlint-cli2-action@v13
       with:
         files: '**/*.md'
         config: '.markdownlint.json'
